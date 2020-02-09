@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
-import axios, { AxiosError } from "axios";
+import React, { useState, useEffect, SyntheticEvent } from "react";
+import { AxiosError } from "axios";
 import { Container } from "semantic-ui-react";
 
 import { IActivity } from "../Models/Activity";
+import Spinner from "../components/Spinner";
 import Navbar from "../components/Navbar";
 import ActivityDashboard from "../pages/ActivityDashboard";
+import agent from "../api/agent";
 
 const App: React.FC = () => {
   const [activities, setActivities] = useState<IActivity[]>([]);
@@ -12,6 +14,9 @@ const App: React.FC = () => {
     null
   );
   const [editMode, setEditMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [target, setTarget] = useState("");
 
   const handleSelectActivity = (id: string) => {
     setSelectedActivity(activities.filter(a => a.id === id)[0]);
@@ -23,20 +28,33 @@ const App: React.FC = () => {
     setEditMode(true);
   };
 
-  const handleCreateActivity = (activity: IActivity) => {
+  const handleCreateActivity = async (activity: IActivity) => {
+    setSubmitting(true);
+    await agent.Activities.create(activity);
     setActivities([...activities, activity]);
     setSelectedActivity(activity);
     setEditMode(false);
+    setSubmitting(false);
   };
 
-  const handleEditActivity = (activity: IActivity) => {
+  const handleEditActivity = async (activity: IActivity) => {
+    setSubmitting(true);
+    await agent.Activities.update(activity);
     setActivities([...activities.filter(a => a.id !== activity.id), activity]);
     setSelectedActivity(activity);
     setEditMode(false);
+    setSubmitting(false);
   };
 
-  const handleDeleteActivity = (id: string) => {
+  const handleDeleteActivity = async (
+    event: SyntheticEvent<HTMLButtonElement>,
+    id: string
+  ) => {
+    setTarget(event.currentTarget.name);
+    setSubmitting(true);
+    await agent.Activities.delete(id);
     setActivities([...activities.filter(a => a.id !== id)]);
+    setSubmitting(false);
   };
 
   useEffect(() => {
@@ -45,19 +63,19 @@ const App: React.FC = () => {
 
   const load = async () => {
     try {
-      const response = await axios.get<IActivity[]>(
-        "http://localhost:5000/api/activities"
-      );
-      const activities = response.data.map(a => {
+      const response = await agent.Activities.list();
+      const activities = response.map(a => {
         return {
           ...a,
           date: a.date.split(".")[0]
         };
       });
       setActivities(activities);
+      setIsLoading(false);
     } catch (error) {
       const e = error as AxiosError;
       console.error(e);
+      setIsLoading(false);
     }
   };
 
@@ -65,17 +83,23 @@ const App: React.FC = () => {
     <>
       <Navbar openCreateForm={handleOpenCreateForm} />
       <Container style={{ marginTop: "7rem" }}>
-        <ActivityDashboard
-          activities={activities}
-          selectActivity={handleSelectActivity}
-          selectedActivity={selectedActivity}
-          setSelectedActivity={setSelectedActivity}
-          editMode={editMode}
-          setEditMode={setEditMode}
-          createActivity={handleCreateActivity}
-          editActivity={handleEditActivity}
-          deleteActivity={handleDeleteActivity}
-        />
+        {isLoading ? (
+          <Spinner content="Chill..." />
+        ) : (
+          <ActivityDashboard
+            activities={activities}
+            selectActivity={handleSelectActivity}
+            selectedActivity={selectedActivity}
+            setSelectedActivity={setSelectedActivity}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            createActivity={handleCreateActivity}
+            editActivity={handleEditActivity}
+            deleteActivity={handleDeleteActivity}
+            submitting={submitting}
+            target={target}
+          />
+        )}
       </Container>
     </>
   );

@@ -9,7 +9,7 @@ const Navbar: React.FC<IProps> = ({ openCreateForm }) => {
   const [activeItem] = useState("activities");
 
   return (
-    <Menu inverted fixed="top">
+    <Menu inverted fixed="top" style={{ zIndex: 10000000000 }}>
       <Container>
         <Menu.Item header>
           <img
