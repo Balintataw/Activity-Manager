@@ -1,67 +1,26 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Grid, GridColumn } from "semantic-ui-react";
-import { IActivity } from "../Models/Activity";
-import { ActivityList } from "../components/ActivityList";
-import { ActivityDetails } from "../components/ActivityDetails";
-import { ActivityForm } from "../components/ActivityForm";
+import { observer } from "mobx-react-lite";
+import ActivityList from "../components/ActivityList";
+import ActivityDetails from "../components/ActivityDetails";
+import ActivityForm from "../components/ActivityForm";
+import ActivityStore from "../stores/activityStore";
 
-interface IProps {
-  activities: IActivity[];
-  selectActivity: (id: string) => void;
-  selectedActivity: IActivity | null;
-  setSelectedActivity: (activity: IActivity | null) => void;
-  editMode: boolean;
-  setEditMode: (editMode: boolean) => void;
-  createActivity: (activity: IActivity) => void;
-  editActivity: (activity: IActivity) => void;
-  deleteActivity: (
-    event: React.SyntheticEvent<HTMLButtonElement>,
-    id: string
-  ) => void;
-  submitting: boolean;
-  target: string;
-}
+const ActivityDashboard = () => {
+  const activityStore = useContext(ActivityStore);
+  const { editMode, selectedActivity } = activityStore;
 
-const ActivityDashboard: React.FC<IProps> = ({
-  activities,
-  selectActivity,
-  selectedActivity,
-  setSelectedActivity,
-  editMode,
-  setEditMode,
-  createActivity,
-  editActivity,
-  deleteActivity,
-  submitting,
-  target
-}) => {
   return (
     <Grid>
       <GridColumn width={10}>
-        <ActivityList
-          activities={activities}
-          selectActivity={selectActivity}
-          deleteActivity={deleteActivity}
-          submitting={submitting}
-          target={target}
-        />
+        <ActivityList />
       </GridColumn>
       <GridColumn width={6}>
-        {selectedActivity && !editMode && (
-          <ActivityDetails
-            activity={selectedActivity}
-            setEditMode={setEditMode}
-            setSelectedActivity={setSelectedActivity}
-          />
-        )}
+        {selectedActivity && !editMode && <ActivityDetails />}
         {editMode && (
           <ActivityForm
             key={selectedActivity?.id || 0} // with an id change, the component will rerender
-            setEditMode={setEditMode}
             activity={selectedActivity!}
-            createActivity={createActivity}
-            editActivity={editActivity}
-            submitting={submitting}
           />
         )}
       </GridColumn>
@@ -69,4 +28,4 @@ const ActivityDashboard: React.FC<IProps> = ({
   );
 };
 
-export default ActivityDashboard;
+export default observer(ActivityDashboard);
