@@ -8,12 +8,11 @@ configure({ enforceActions: "always" });
 
 class ActivityStore {
   @observable activityRegistry = new Map();
-  @observable activities: IActivity[] = [];
+  // @observable activities: IActivity[] = [];
+  @observable activity: IActivity | null = null;
   @observable target = "";
   @observable loading = false;
-  @observable editMode = false;
   @observable submitting = false;
-  @observable selectedActivity: IActivity | undefined;
 
   @computed get activitiesByDate() {
     return Array.from(this.activityRegistry.values())
@@ -41,14 +40,42 @@ class ActivityStore {
     }
   };
 
+  getActivity = (id: string) => {
+    return this.activityRegistry.get(id);
+  };
+
+  @action loadActivity = async (id: string) => {
+    let ac = this.getActivity(id);
+    if (ac) {
+      this.activity = ac;
+    } else {
+      this.loading = true;
+      try {
+        ac = await agent.Activities.details(id);
+        runInAction("getting activity", () => {
+          this.activity = ac;
+          this.loading = false;
+        });
+      } catch (error) {
+        runInAction("get activity error", () => {
+          this.loading = false;
+        });
+        console.log(error);
+      }
+    }
+  };
+
+  @action clearActivity = () => {
+    this.activity = null;
+  };
+
   @action createActivity = async (activity: IActivity) => {
     this.submitting = true;
     try {
       await agent.Activities.create(activity);
       runInAction("createActivity", () => {
         this.activityRegistry.set(activity.id, activity);
-        this.selectedActivity = activity;
-        this.editMode = false;
+        this.activity = activity;
       });
     } catch (error) {
       const e = error as AxiosError;
@@ -66,8 +93,7 @@ class ActivityStore {
       await agent.Activities.update(activity);
       runInAction("editActivity", () => {
         this.activityRegistry.set(activity.id, activity);
-        this.selectedActivity = activity;
-        this.editMode = false;
+        this.activity = activity;
       });
     } catch (error) {
       const e = error as AxiosError;
@@ -99,29 +125,6 @@ class ActivityStore {
         this.target = "";
       });
     }
-  };
-
-  @action openCreateForm = () => {
-    this.editMode = true;
-    this.selectedActivity = undefined;
-  };
-
-  @action openEditForm = (id: string) => {
-    this.selectedActivity = this.activityRegistry.get(id);
-    this.editMode = true;
-  };
-
-  @action cancelSelectedActivity = () => {
-    this.selectedActivity = undefined;
-  };
-
-  @action cancelFormOpen = () => {
-    this.editMode = false;
-  };
-
-  @action selectActivity = (id: string) => {
-    this.selectedActivity = this.activityRegistry.get(id);
-    this.editMode = false;
   };
 }
 
