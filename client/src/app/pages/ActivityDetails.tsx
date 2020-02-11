@@ -1,13 +1,16 @@
 import React, { useContext, useEffect } from "react";
-import { Card, Image, Button } from "semantic-ui-react";
-import { useParams, useHistory, Link } from "react-router-dom";
+import { Grid } from "semantic-ui-react";
+import { useParams } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 
 import ActivityStore from "../stores/activityStore";
 import Spinner from "../components/Spinner";
+import ActivityDetailsHeader from "../components/ActivityDetailsHeader";
+import ActivityDetailsInfo from "../components/ActivityDetailsInfo";
+import ActivityDetailsChat from "../components/ActivityDetailsChat";
+import ActivityDetailsSidebar from "../components/ActivityDetailsSidebar";
 
 const ActivityDetails: React.FC = () => {
-  const history = useHistory();
   const activityStore = useContext(ActivityStore);
   const { activity, loadActivity, loading } = activityStore;
   const params = useParams<{ id: string }>();
@@ -16,40 +19,19 @@ const ActivityDetails: React.FC = () => {
     loadActivity(params.id);
   }, [loadActivity, params.id]);
 
-  if (loading) return <Spinner content="Loading Activity..." />;
+  if (loading || !activity) return <Spinner content="Loading Activity..." />;
 
   return (
-    <Card fluid>
-      <Image
-        src={`/assets/categoryImages/${activity?.category}.jpg`}
-        wrapped
-        ui={false}
-      />
-      <Card.Content>
-        <Card.Header>{activity?.title || "Title"}</Card.Header>
-        <Card.Meta>
-          <span>{activity?.date}</span>
-        </Card.Meta>
-        <Card.Description>{activity?.description}</Card.Description>
-      </Card.Content>
-      <Card.Content extra>
-        <Button.Group widths={2}>
-          <Button
-            as={Link}
-            to={`/manage/${activity?.id}`}
-            basic
-            color="blue"
-            content="Edit"
-          />
-          <Button
-            basic
-            color="grey"
-            content="Cancel"
-            onClick={() => history.push("/activities")}
-          />
-        </Button.Group>
-      </Card.Content>
-    </Card>
+    <Grid>
+      <Grid.Column width={10}>
+        <ActivityDetailsHeader activity={activity} />
+        <ActivityDetailsInfo activity={activity} />
+        <ActivityDetailsChat />
+      </Grid.Column>
+      <Grid.Column width={6}>
+        <ActivityDetailsSidebar />
+      </Grid.Column>
+    </Grid>
   );
 };
 
