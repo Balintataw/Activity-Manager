@@ -4,6 +4,7 @@ import { IActivity } from "../Models/Activity";
 import agent from "../api/agent";
 import { AxiosError } from "axios";
 import { history } from "../..";
+import { toast } from "react-toastify";
 
 configure({ enforceActions: "always" });
 
@@ -99,6 +100,7 @@ class ActivityStore {
       history.push(`/activities/${activity.id}`);
     } catch (error) {
       const e = error as AxiosError;
+      toast.error("Problem submitting data");
       console.error(e);
     } finally {
       runInAction("createActivity complete", () => {
@@ -118,6 +120,7 @@ class ActivityStore {
       history.push(`/activities/${activity.id}`);
     } catch (error) {
       const e = error as AxiosError;
+      toast.error("Problem submitting data");
       console.error(e);
     } finally {
       runInAction("editActivity complete", () => {

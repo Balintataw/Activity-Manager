@@ -4,7 +4,13 @@ import { useParams, useHistory } from "react-router-dom";
 import { Form as FinalForm, Field } from "react-final-form";
 import { v4 as uuid } from "uuid";
 import { observer } from "mobx-react-lite";
-import { IActivityFormValues, ActivityFormValues } from "../Models/Activity";
+import {
+  combineValidators,
+  isRequired,
+  composeValidators,
+  hasLengthGreaterThan
+} from "revalidate";
+import { ActivityFormValues } from "../Models/Activity";
 import ActivityStore from "../stores/activityStore";
 import { category } from "../common/options/categoryOptions";
 import TextInput from "../common/form/TextInput";
@@ -13,6 +19,21 @@ import SelectInput from "../common/form/SelectInput";
 import DateInput from "../common/form/DateInput";
 import { combineDateTime } from "../common/util/util";
 
+const validate = combineValidators({
+  title: isRequired({ message: "Event title is required" }),
+  category: isRequired("Category"),
+  description: composeValidators(
+    isRequired,
+    hasLengthGreaterThan(5)({
+      message: "Description must be at least 5 characters"
+    })
+  )("Description"),
+  city: isRequired("City"),
+  venue: isRequired("Venue"),
+  date: isRequired("Date"),
+  time: isRequired("Time")
+});
+
 export const ActivityForm: React.FC = () => {
   const activityStore = useContext(ActivityStore);
   const {
@@ -20,9 +41,7 @@ export const ActivityForm: React.FC = () => {
     loadActivity,
     editActivity,
     submitting,
-    target,
-    activity: initialActivity,
-    clearActivity
+    target
   } = activityStore;
 
   const history = useHistory();
@@ -60,9 +79,10 @@ export const ActivityForm: React.FC = () => {
       <Grid.Column width={10}>
         <Segment clearing>
           <FinalForm
+            validate={validate}
             initialValues={activity}
             onSubmit={handleFinalFormSubmit}
-            render={({ handleSubmit }) => (
+            render={({ handleSubmit, invalid, pristine }) => (
               <Form onSubmit={handleSubmit} loading={loading}>
                 <Field
                   name="title"
@@ -118,7 +138,7 @@ export const ActivityForm: React.FC = () => {
                   type="submit"
                   content="Submit"
                   loading={!target && submitting}
-                  disabled={loading}
+                  disabled={loading || invalid || pristine}
                 />
                 <Button
                   floated="right"
