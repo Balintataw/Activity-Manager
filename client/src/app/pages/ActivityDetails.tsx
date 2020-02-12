@@ -19,7 +19,8 @@ const ActivityDetails: React.FC = () => {
     loadActivity(params.id);
   }, [loadActivity, params.id]);
 
-  if (loading || !activity) return <Spinner content="Loading Activity..." />;
+  if (loading) return <Spinner content="Loading Activity..." />;
+  if (!activity) return <h2>Activity not found</h2>;
 
   return (
     <Grid>

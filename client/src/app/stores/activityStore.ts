@@ -3,12 +3,12 @@ import { observable, action, computed, configure, runInAction } from "mobx";
 import { IActivity } from "../Models/Activity";
 import agent from "../api/agent";
 import { AxiosError } from "axios";
+import { history } from "../..";
 
 configure({ enforceActions: "always" });
 
 class ActivityStore {
   @observable activityRegistry = new Map();
-  // @observable activities: IActivity[] = [];
   @observable activity: IActivity | null = null;
   @observable target = "";
   @observable loading = false;
@@ -23,10 +23,10 @@ class ActivityStore {
   groupActivitiesByDate = (activities: IActivity[]) => {
     const sortedActivities = activities
       .slice()
-      .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
     return Object.entries(
       sortedActivities.reduce((activities, activity) => {
-        const date = activity.date.split("T")[0];
+        const date = activity.date.toISOString().split("T")[0];
         activities[date] = activities[date]
           ? [...activities[date], activity]
           : [activity];
@@ -41,7 +41,7 @@ class ActivityStore {
       const activities = await agent.Activities.list();
       runInAction("loadActivities", () => {
         activities.forEach(a => {
-          a.date = a.date.split(".")[0];
+          a.date = new Date(a.date);
           this.activityRegistry.set(a.id, a);
         });
       });
@@ -60,17 +60,21 @@ class ActivityStore {
   };
 
   @action loadActivity = async (id: string) => {
-    let ac = this.getActivity(id);
-    if (ac) {
-      this.activity = ac;
+    let activity = this.getActivity(id);
+    if (activity) {
+      this.activity = activity;
+      return activity;
     } else {
       this.loading = true;
       try {
-        ac = await agent.Activities.details(id);
+        activity = await agent.Activities.details(id);
         runInAction("getting activity", () => {
-          this.activity = ac;
+          activity.date = new Date(activity.date);
+          this.activity = activity;
+          this.activityRegistry.set(activity.id, activity);
           this.loading = false;
         });
+        return activity;
       } catch (error) {
         runInAction("get activity error", () => {
           this.loading = false;
@@ -92,6 +96,7 @@ class ActivityStore {
         this.activityRegistry.set(activity.id, activity);
         this.activity = activity;
       });
+      history.push(`/activities/${activity.id}`);
     } catch (error) {
       const e = error as AxiosError;
       console.error(e);
@@ -110,6 +115,7 @@ class ActivityStore {
         this.activityRegistry.set(activity.id, activity);
         this.activity = activity;
       });
+      history.push(`/activities/${activity.id}`);
     } catch (error) {
       const e = error as AxiosError;
       console.error(e);
