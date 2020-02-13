@@ -24,3 +24,15 @@ Runs the .NET Core Api with hot reload enabled
 ### `dotnet ef database drop -p Persistence/ -s API/`
 
 Will drop local db. Running api again will automatically seed data.
+
+### `dotnet new classlib -n <name>`
+
+Create new class library
+
+### `dotnet sln add <name>`
+
+Add class library to the solution
+
+### `dotnet user-secrets set "TokenKey" "<your-development-token key>" -p API/`
+
+Run from root of project to create a dev jwt token key
