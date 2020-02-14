@@ -18,6 +18,7 @@ import TextAreaInput from "../common/form/TextAreaInput";
 import SelectInput from "../common/form/SelectInput";
 import DateInput from "../common/form/DateInput";
 import { combineDateTime } from "../common/util/util";
+import { RootStoreContext } from "../stores/rootStore";
 
 const validate = combineValidators({
   title: isRequired({ message: "Event title is required" }),
@@ -35,14 +36,14 @@ const validate = combineValidators({
 });
 
 export const ActivityForm: React.FC = () => {
-  const activityStore = useContext(ActivityStore);
+  const rootStore = useContext(RootStoreContext);
   const {
     createActivity,
     loadActivity,
     editActivity,
     submitting,
     target
-  } = activityStore;
+  } = rootStore.activityStore;
 
   const history = useHistory();
   const params = useParams<{ id: string }>();
