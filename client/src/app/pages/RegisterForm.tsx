@@ -9,18 +9,20 @@ import { combineValidators, isRequired } from "revalidate";
 import ErrorMessage from "../common/form/ErrorMessage";
 
 const validate = combineValidators({
+  username: isRequired("username"),
+  displayname: isRequired("displayname"),
   email: isRequired("email"),
   password: isRequired("password")
 });
 
-const LoginForm = () => {
+const RegisterForm = () => {
   const rootStore = useContext(RootStoreContext);
-  const { login } = rootStore.userStore;
+  const { register } = rootStore.userStore;
   return (
     <FinalForm
       validate={validate}
       onSubmit={(values: IUserFormValues) =>
-        login(values).catch(error => ({
+        register(values).catch(error => ({
           [FORM_ERROR]: error
         }))
       }
@@ -33,7 +35,13 @@ const LoginForm = () => {
         dirtySinceLastSubmit
       }) => (
         <Form onSubmit={handleSubmit} error>
-          <Header as="h2" content="Login" color="teal" textAlign="center" />
+          <Header as="h2" content="Register" color="teal" textAlign="center" />
+          <Field name="username" component={TextInput} placeholder="Username" />
+          <Field
+            name="displayname"
+            component={TextInput}
+            placeholder="Display Name"
+          />
           <Field name="email" component={TextInput} placeholder="Email" />
           <Field
             name="password"
@@ -42,25 +50,21 @@ const LoginForm = () => {
             type="password"
           />
           {submitError && submitError.statusText && !dirtySinceLastSubmit && (
-            <ErrorMessage
-              error={submitError}
-              text="Invalid email or password"
-            />
+            <ErrorMessage error={submitError} />
           )}
           <br />
           <Button
             fluid
             color="teal"
-            content="Login"
+            content="Register"
             onClick={handleSubmit}
             loading={submitting}
             disabled={pristine || (invalid && !dirtySinceLastSubmit)}
           />
-          {/* <pre>{JSON.stringify(form.getState(), null, 2)}</pre> */}
         </Form>
       )}
     />
   );
 };
 
-export default LoginForm;
+export default RegisterForm;

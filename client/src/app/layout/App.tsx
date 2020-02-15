@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Container } from "semantic-ui-react";
 import { ToastContainer } from "react-toastify";
 import { observer } from "mobx-react-lite";
@@ -18,10 +18,28 @@ import ActivityDetails from "../pages/ActivityDetails";
 import ActivityDashboard from "../pages/ActivityDashboard";
 import NotFound from "./NotFound";
 import LoginForm from "../pages/LoginForm";
+import { RootStoreContext } from "../stores/rootStore";
+import Spinner from "../components/Spinner";
+import ModalContainer from "../common/modals/ModalContainer";
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
+  const rootStore = useContext(RootStoreContext);
+  const { setAppLoaded, token, appLoaded } = rootStore.commonStore;
+  const { getUser } = rootStore.userStore;
+
+  React.useEffect(() => {
+    if (token) {
+      getUser().finally(() => setAppLoaded());
+    } else {
+      setAppLoaded();
+    }
+  }, [getUser, setAppLoaded, token]);
+
+  if (!appLoaded) return <Spinner content="Loading App..." />;
+
   return (
     <>
+      <ModalContainer />
       <ToastContainer position="bottom-right" />
       <Route path="/" exact component={Home} />
       <Route

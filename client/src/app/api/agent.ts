@@ -27,37 +27,46 @@ axios.interceptors.response.use(undefined, error => {
   throw error.response;
 });
 
-axios.interceptors.request.use(undefined, response => {
-  // console.log("INTERCEPT", response);
-});
+axios.interceptors.request.use(
+  config => {
+    const token = window.localStorage.getItem("jwt");
+    if (token) {
+      config.headers.authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
 
 const responseBody = (response: AxiosResponse) => response.data;
 
-const sleep = (ms: number) => (response: AxiosResponse) =>
-  new Promise<AxiosResponse>(resolve =>
-    setTimeout(() => resolve(response), ms)
-  );
+// const sleep = (ms: number) => (response: AxiosResponse) =>
+//   new Promise<AxiosResponse>(resolve =>
+//     setTimeout(() => resolve(response), ms)
+//   );
 
 const requests = {
   get: (url: string) =>
     axios
       .get(url)
-      .then(sleep(1500))
+      // .then(sleep(1500))
       .then(responseBody),
   post: (url: string, body: {}) =>
     axios
       .post(url, body)
-      .then(sleep(1500))
+      // .then(sleep(1500))
       .then(responseBody),
   put: (url: string, body: {}) =>
     axios
       .put(url, body)
-      .then(sleep(1500))
+      // .then(sleep(1500))
       .then(responseBody),
   delete: (url: string) =>
     axios
       .delete(url)
-      .then(sleep(1500))
+      // .then(sleep(1500))
       .then(responseBody)
 };
 

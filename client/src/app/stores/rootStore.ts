@@ -1,20 +1,23 @@
-import ActivityStore from "./activityStore";
-import UserStore from "./userStore";
 import { createContext } from "react";
 import { configure } from "mobx";
+import ActivityStore from "./activityStore";
 import CommonStore from "./commonStore";
+import ModalStore from "./modalStore";
+import UserStore from "./userStore";
 
 configure({ enforceActions: "always" });
 
 export class RootStore {
   activityStore: ActivityStore;
-  userStore: UserStore;
   commonStore: CommonStore;
+  modalStore: ModalStore;
+  userStore: UserStore;
 
   constructor() {
     this.activityStore = new ActivityStore(this);
-    this.userStore = new UserStore(this);
     this.commonStore = new CommonStore(this);
+    this.modalStore = new ModalStore(this);
+    this.userStore = new UserStore(this);
   }
 }
 

@@ -2,10 +2,13 @@ import React, { useContext } from "react";
 import { Container, Segment, Header, Button, Image } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { RootStoreContext } from "../stores/rootStore";
+import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
 
 const Home = () => {
   const rootStore = useContext(RootStoreContext);
   const { isLoggedIn, user } = rootStore.userStore;
+  const { openModal } = rootStore.modalStore;
   return (
     <Segment inverted textAlign="center" vertical className="masthead">
       <Container text>
@@ -26,16 +29,24 @@ const Home = () => {
               content={`Welcome back ${user.displayName}`}
             />
             <Button as={Link} to="/activities" size="huge" inverted>
-              Activities
+              Go To Activities
             </Button>
           </>
         ) : (
           <>
             <Header as="h2" inverted content={`Welcome to Kasama`} />
-            <Button as={Link} to="/login" size="huge" inverted>
+            <Button
+              onClick={() => openModal(<LoginForm />, "mini")}
+              size="huge"
+              inverted
+            >
               Login
             </Button>
-            <Button as={Link} to="/register" size="huge" inverted>
+            <Button
+              onClick={() => openModal(<RegisterForm />, "mini")}
+              size="huge"
+              inverted
+            >
               Register
             </Button>
           </>

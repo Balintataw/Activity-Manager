@@ -22,8 +22,10 @@ export default class UserStore {
         this.user = user;
       });
       this.rootStore.commonStore.setToken(user.token);
+      this.rootStore.modalStore.closeModal();
       history.replace("/activities");
     } catch (error) {
+      console.log("E", error);
       throw error;
     }
   };
@@ -32,5 +34,30 @@ export default class UserStore {
     this.rootStore.commonStore.clearToken();
     this.user = null;
     history.replace("/");
+  };
+
+  @action register = async (values: IUserFormValues) => {
+    try {
+      const user = await agent.User.register(values);
+      runInAction("register action", () => {
+        this.user = user;
+      });
+      this.rootStore.commonStore.setToken(user.token);
+      this.rootStore.modalStore.closeModal();
+      history.replace("/activities");
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  @action getUser = async () => {
+    try {
+      const user = await agent.User.current();
+      runInAction(() => {
+        this.user = user;
+      });
+    } catch (error) {
+      console.log("GetUser error", error);
+    }
   };
 }
