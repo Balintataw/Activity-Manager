@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
-namespace Domain
+namespace Application.Activities
 {
-  public class Activity
+  // Data Transfer Object
+  public class ActivityDto
   {
+
     public Guid Id { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
@@ -12,7 +15,8 @@ namespace Domain
     public DateTime Date { get; set; }
     public string City { get; set; }
     public string Venue { get; set; }
-    // virtual required to indicate it is to be lazy loaded
-    public virtual ICollection<UserActivity> UserActivities { get; set; }
+    // will map userActivities to a property called attendees
+    [JsonPropertyName("attendees")]
+    public ICollection<AttendeeDto> UserActivities { get; set; }
   }
 }
