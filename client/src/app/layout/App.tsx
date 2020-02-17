@@ -9,16 +9,15 @@ import {
   Switch
 } from "react-router-dom";
 
-import Navbar from "../components/Navbar";
-
-import { ProtectedRoute } from "../Router/ProtectedRoute";
+import { RootStoreContext } from "../stores/rootStore";
+import { ProtectedRoute } from "../router/ProtectedRoute";
 import Home from "../pages/Home";
+import Profile from "../pages/Profile";
 import ActivityForm from "../pages/ActivityForm";
 import ActivityDetails from "../pages/ActivityDetails";
 import ActivityDashboard from "../pages/ActivityDashboard";
 import NotFound from "./NotFound";
-import LoginForm from "../pages/LoginForm";
-import { RootStoreContext } from "../stores/rootStore";
+import Navbar from "../components/Navbar";
 import Spinner from "../components/Spinner";
 import ModalContainer from "../common/modals/ModalContainer";
 
@@ -43,6 +42,7 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
       <ToastContainer position="bottom-right" />
       <Route path="/" exact component={Home} />
       <Route
+        // because we don't want the navbar on the home page
         path={"/(.+)"}
         render={() => (
           <>
@@ -63,7 +63,7 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
                   component={ActivityForm}
                   key={location.key}
                 />
-                <Route path="/login" component={LoginForm} />
+                <ProtectedRoute path="/profile/:username" component={Profile} />
                 <Route component={NotFound} />
               </Switch>
             </Container>
