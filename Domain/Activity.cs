@@ -14,5 +14,6 @@ namespace Domain
     public string Venue { get; set; }
     // virtual required to indicate it is to be lazy loaded
     public virtual ICollection<UserActivity> UserActivities { get; set; }
+    public virtual ICollection<Comment> Comments { get; set; }
   }
 }

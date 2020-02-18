@@ -1,6 +1,11 @@
 import { SyntheticEvent } from "react";
 import { AxiosError } from "axios";
 import { observable, action, computed, runInAction } from "mobx";
+import {
+  HubConnection,
+  HubConnectionBuilder,
+  LogLevel
+} from "@microsoft/signalr";
 import { toast } from "react-toastify";
 import { IActivity } from "../Models/Activity";
 import agent from "../api/agent";
@@ -13,6 +18,7 @@ export default class ActivityStore {
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
   }
+  @observable.ref hubConnection: HubConnection | null = null;
   @observable activityRegistry = new Map();
   @observable activity: IActivity | null = null;
   @observable target = "";
@@ -101,6 +107,7 @@ export default class ActivityStore {
       const attendee = createAttendee(this.rootStore.userStore.user!);
       attendee.isHost = true;
       activity.isHost = true;
+      activity.comments = [];
       activity.attendees = [attendee];
       runInAction("createActivity", () => {
         this.activityRegistry.set(activity.id, activity);
@@ -200,6 +207,56 @@ export default class ActivityStore {
       runInAction("cancel attendance error", () => {
         this.working = false;
       });
+    }
+  };
+
+  @action createHubConnection = (activityId: string) => {
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl("http://localhost:5000/chat", {
+        accessTokenFactory: () => this.rootStore.commonStore.token!
+      })
+      .configureLogging(LogLevel.Information)
+      .build();
+
+    this.hubConnection
+      .start()
+      .then(() => console.log("Connection started", this.hubConnection!.state))
+      .then(() => {
+        console.log("Attempting to join group:", activityId);
+        // "AddToGroup" must match methid in ChatHub
+        setTimeout(() => {
+          this.hubConnection!.invoke("AddToGroup", activityId);
+        }, 100);
+      })
+      .catch(error => console.log("Error connecting signalr", error));
+
+    this.hubConnection.on("ReceiveComment", comment => {
+      runInAction("receive comment", () => {
+        this.activity!.comments.push(comment);
+      });
+    });
+
+    this.hubConnection.on("Send", message => {
+      // toast.info(message);
+    });
+  };
+
+  @action stopHubConnection = (activityId: string) => {
+    this.hubConnection!.invoke("RemoveFromGroup", activityId)
+      .then(() => {
+        return this.hubConnection!.stop();
+      })
+      .then(() => console.log("Connection Stopped"))
+      .catch(error => console.log("Stop connection error:", error));
+  };
+
+  @action addComment = async (values: any) => {
+    values.activityId = this.activity!.id;
+    try {
+      // "SendComment" needs to match what is in ChatHub.cs
+      await this.hubConnection!.invoke("SendComment", values);
+    } catch (error) {
+      console.log(error);
     }
   };
 }
