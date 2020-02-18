@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { toast } from "react-toastify";
-import { IActivity } from "../Models/Activity";
+import { IActivity, IActivitiesEnvelope } from "../Models/Activity";
 import { history } from "../..";
 import { IUser, IUserFormValues } from "../Models/User";
 import { IProfile, IPhoto } from "../Models/Profile";
@@ -81,7 +81,10 @@ const requests = {
 };
 
 const Activities = {
-  list: (): Promise<IActivity[]> => requests.get("/activities"),
+  list: (limit?: number, page?: number): Promise<IActivitiesEnvelope> =>
+    requests.get(
+      `/activities?limit=${limit}&offset=${page ? page * limit! : 0}`
+    ),
   details: (id: string): Promise<IActivity> =>
     requests.get(`/activities/${id}`),
   create: (activity: IActivity) => requests.post("/activities", activity),

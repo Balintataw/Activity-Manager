@@ -13,6 +13,8 @@ import { history } from "../..";
 import { RootStore } from "./rootStore";
 import { setActivityProps, createAttendee } from "../common/util/util";
 
+const LIMIT = 3;
+
 export default class ActivityStore {
   rootStore: RootStore;
   constructor(rootStore: RootStore) {
@@ -25,12 +27,22 @@ export default class ActivityStore {
   @observable loading = false;
   @observable submitting = false;
   @observable working = false;
+  @observable activityCount = 0;
+  @observable page = 0;
+
+  @computed get totalPages() {
+    return Math.ceil(this.activityCount / LIMIT);
+  }
 
   @computed get activitiesByDate() {
     return this.groupActivitiesByDate(
       Array.from(this.activityRegistry.values())
     );
   }
+
+  @action setPage = (page: number) => {
+    this.page = page;
+  };
 
   groupActivitiesByDate = (activities: IActivity[]) => {
     const sortedActivities = activities
@@ -50,12 +62,14 @@ export default class ActivityStore {
   @action loadActivities = async () => {
     this.loading = true;
     try {
-      const activities = await agent.Activities.list();
+      const activitiesEnvelope = await agent.Activities.list(LIMIT, this.page);
+      const { activities, activityCount } = activitiesEnvelope;
       runInAction("loadActivities", () => {
         activities.forEach(activity => {
           setActivityProps(activity, this.rootStore.userStore.user!);
           this.activityRegistry.set(activity.id, activity);
         });
+        this.activityCount = activityCount;
       });
     } catch (error) {
       const e = error as AxiosError;
