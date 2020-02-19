@@ -10,7 +10,7 @@ import {
 } from "react-router-dom";
 
 import { RootStoreContext } from "../stores/rootStore";
-import { ProtectedRoute } from "../router/ProtectedRoute";
+import ProtectedRoute from "../router/ProtectedRoute";
 import Home from "../pages/Home";
 import Profile from "../pages/Profile";
 import ActivityForm from "../pages/ActivityForm";

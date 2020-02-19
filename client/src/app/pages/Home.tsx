@@ -6,6 +6,7 @@ import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 
 const Home = () => {
+  const token = window.localStorage.getItem("jwt");
   const rootStore = useContext(RootStoreContext);
   const { isLoggedIn, user } = rootStore.userStore;
   const { openModal } = rootStore.modalStore;
@@ -21,7 +22,7 @@ const Home = () => {
           />
           Kasama
         </Header>
-        {isLoggedIn && user ? (
+        {isLoggedIn && user && token ? (
           <>
             <Header
               as="h2"

@@ -23,6 +23,7 @@ using Infrastructure.Photos;
 using System.Threading.Tasks;
 using API.SignalR;
 using Application.Profiles;
+using System;
 
 namespace API
 {
@@ -52,7 +53,7 @@ namespace API
       {
         opts.AddPolicy("CorsPolicy", policy =>
         {
-          policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000").AllowCredentials();
+          policy.AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("WWW-Authenticate").WithOrigins("http://localhost:3000").AllowCredentials();
         });
       });
 
@@ -87,7 +88,9 @@ namespace API
           ValidateIssuerSigningKey = true,
           IssuerSigningKey = key,
           ValidateAudience = false,
-          ValidateIssuer = false
+          ValidateIssuer = false,
+          ValidateLifetime = true,
+          ClockSkew = TimeSpan.Zero // eliminates 5 min leeway in token expiry check
         };
         opt.Events = new JwtBearerEvents
         {

@@ -11,7 +11,7 @@ axios.interceptors.response.use(undefined, error => {
   if (error.message === "Network Error" && !error.response) {
     toast.error("Network Error");
   }
-  const { status, data, config, statusText } = error.response;
+  const { status, data, config, statusText, headers } = error.response;
   if (status === 404) {
     history.push("/not_found");
   }
@@ -21,6 +21,14 @@ axios.interceptors.response.use(undefined, error => {
     data.errors.hasOwnProperty("id")
   ) {
     history.push("/not_found");
+  }
+  if (status === 401) {
+    if (headers["www-authenticate"].includes(`Bearer error="invalid_token"`)) {
+      // token has expired
+      window.localStorage.removeItem("jwt");
+      history.replace("/");
+      toast.info("Your session has expired, please login again");
+    }
   }
   if (status === 500) {
     toast.error(`Error - ${statusText}`);

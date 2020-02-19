@@ -3,10 +3,10 @@ import { Grid, GridColumn, Loader } from "semantic-ui-react";
 import { observer } from "mobx-react-lite";
 import InfiniteScroll from "react-infinite-scroller";
 
-import Spinner from "../components/Spinner";
-import ActivityList from "../components/ActivityList";
 import { RootStoreContext } from "../stores/rootStore";
+import ActivityList from "../components/ActivityList";
 import ActivityFilters from "../components/ActivityFilters";
+import ActivityListItemPlaceholder from "../components/ActivityListItemPlaceholder";
 
 const ActivityDashboard: React.FC = () => {
   const rootStore = useContext(RootStoreContext);
@@ -29,19 +29,21 @@ const ActivityDashboard: React.FC = () => {
     loadActivities();
   }, [loadActivities]);
 
-  if (loading && page === 0) return <Spinner content="Loading activities" />;
-
   return (
     <Grid>
       <GridColumn width={10}>
-        <InfiniteScroll
-          pageStart={0}
-          loadMore={handleGetNext}
-          hasMore={!loadingNext && page + 1 < totalPages}
-          initialLoad={false}
-        >
-          <ActivityList />
-        </InfiniteScroll>
+        {loading && page === 0 ? (
+          <ActivityListItemPlaceholder />
+        ) : (
+          <InfiniteScroll
+            pageStart={0}
+            loadMore={handleGetNext}
+            hasMore={!loadingNext && page + 1 < totalPages}
+            initialLoad={false}
+          >
+            <ActivityList />
+          </InfiniteScroll>
+        )}
       </GridColumn>
       <GridColumn width={6}>
         <ActivityFilters />

@@ -1,14 +1,21 @@
 import React, { useContext } from "react";
-import { Route, Redirect } from "react-router-dom";
+import {
+  Route,
+  Redirect,
+  RouteProps,
+  RouteComponentProps
+} from "react-router-dom";
 import { RootStoreContext } from "../stores/rootStore";
+import { observer } from "mobx-react-lite";
 
-interface IProps {
-  exact?: boolean;
-  path: string | string[];
-  component: React.ComponentType<any>;
+interface IProps extends RouteProps {
+  component: React.ComponentType<RouteComponentProps<any>>;
 }
 
-export const ProtectedRoute = ({ component: C, ...rest }: IProps) => {
+const ProtectedRoute: React.FC<IProps> = ({
+  component: C,
+  ...rest
+}: IProps) => {
   const rootStore = useContext(RootStoreContext);
   const { isLoggedIn } = rootStore.userStore;
   return (
@@ -18,3 +25,5 @@ export const ProtectedRoute = ({ component: C, ...rest }: IProps) => {
     />
   );
 };
+
+export default observer(ProtectedRoute);
