@@ -6,6 +6,7 @@ import InfiniteScroll from "react-infinite-scroller";
 import Spinner from "../components/Spinner";
 import ActivityList from "../components/ActivityList";
 import { RootStoreContext } from "../stores/rootStore";
+import ActivityFilters from "../components/ActivityFilters";
 
 const ActivityDashboard: React.FC = () => {
   const rootStore = useContext(RootStoreContext);
@@ -43,7 +44,7 @@ const ActivityDashboard: React.FC = () => {
         </InfiniteScroll>
       </GridColumn>
       <GridColumn width={6}>
-        <h2>Activity filters</h2>
+        <ActivityFilters />
       </GridColumn>
       <GridColumn width={10}>
         <Loader active={loadingNext} />

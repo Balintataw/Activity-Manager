@@ -27,6 +27,7 @@ const ProfileAbout = () => {
             <ProfileAboutEdit
               updateProfile={updateProfile}
               profile={profile!}
+              setEditMode={setEditMode}
             />
           ) : (
             <span>{profile!.bio}</span>

@@ -12,20 +12,27 @@ import TextAreaInput from "../common/form/TextAreaInput";
 interface IProps {
   updateProfile: (profile: IProfile) => Promise<IProfile>;
   profile: IProfile;
+  setEditMode: (value: boolean) => void;
 }
 
 const validate = combineValidators({
   displayName: isRequired("displayName")
 });
 
-const ProfileAboutEdit: React.FC<IProps> = ({ updateProfile, profile }) => {
+const ProfileAboutEdit: React.FC<IProps> = ({
+  updateProfile,
+  profile,
+  setEditMode
+}) => {
   return (
     <FinalForm
       validate={validate}
       onSubmit={(values: IProfile) =>
-        updateProfile(values).catch(error => ({
-          [FORM_ERROR]: error
-        }))
+        updateProfile(values)
+          .then(() => setEditMode(false))
+          .catch(error => ({
+            [FORM_ERROR]: error
+          }))
       }
       initialValues={profile!}
       render={({
