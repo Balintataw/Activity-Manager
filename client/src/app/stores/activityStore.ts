@@ -1,6 +1,13 @@
 import { SyntheticEvent } from "react";
 import { AxiosError } from "axios";
-import { observable, action, computed, runInAction, reaction } from "mobx";
+import {
+  observable,
+  action,
+  computed,
+  runInAction,
+  reaction,
+  toJS
+} from "mobx";
 import {
   HubConnection,
   HubConnectionBuilder,
@@ -120,15 +127,16 @@ export default class ActivityStore {
     let activity = this.getActivity(id);
     if (activity) {
       this.activity = activity;
-      return activity;
+      // toJS convert an observable to a javascript object
+      return toJS(activity);
     } else {
       this.loading = true;
       try {
         activity = await agent.Activities.details(id);
         runInAction("getting activity", () => {
           setActivityProps(activity, this.rootStore.userStore.user!);
-          // this.activityRegistry.set(activity.id, activity);
           this.activity = activity;
+          this.activityRegistry.set(activity.id, activity);
           this.loading = false;
         });
         return activity;
