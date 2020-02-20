@@ -5,7 +5,7 @@ import { history } from "../..";
 import { IUser, IUserFormValues } from "../Models/User";
 import { IProfile, IPhoto } from "../Models/Profile";
 
-axios.defaults.baseURL = "http://localhost:5000/api";
+axios.defaults.baseURL = process.env.REACT_APP_BASE_API_URL;
 
 axios.interceptors.response.use(undefined, error => {
   if (error.message === "Network Error" && !error.response) {

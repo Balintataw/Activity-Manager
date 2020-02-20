@@ -37,6 +37,28 @@ namespace API
     public IConfiguration Configuration { get; }
 
     // This method gets called by the runtime. Use this method to add services to the container.
+    public void ConfigureDevelopmentServices(IServiceCollection services)
+    {
+
+      services.AddDbContext<DataContext>(opt =>
+      {
+        opt.UseLazyLoadingProxies();
+        opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+      });
+      ConfigureServices(services);
+    }
+
+    public void ConfigureProductionServices(IServiceCollection services)
+    {
+
+      services.AddDbContext<DataContext>(opt =>
+      {
+        opt.UseLazyLoadingProxies();
+        // opt.UseMySql(Configuration.GetConnectionString("DefaultConnection"), opts => opts.EnableRetryOnFailure());
+        opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), opts => opts.EnableRetryOnFailure());
+      });
+      ConfigureServices(services);
+    }
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddControllers(opt =>
@@ -61,11 +83,11 @@ namespace API
       services.AddSignalR();
       services.AddAutoMapper(typeof(List.Handler));
 
-      services.AddDbContext<DataContext>(opt =>
-      {
-        opt.UseLazyLoadingProxies();
-        opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
-      });
+      // services.AddDbContext<DataContext>(opt =>
+      // {
+      //   opt.UseLazyLoadingProxies();
+      //   opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+      // });
 
       var builder = services.AddIdentityCore<AppUser>();
       var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
@@ -80,6 +102,7 @@ namespace API
       });
       services.AddTransient<IAuthorizationHandler, isHostRequirementsHandler>();
 
+      // Configuration comes from dotnet user-secrets in dev and appsettings.json in prod
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
       {
@@ -118,14 +141,38 @@ namespace API
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+      // error handling at the top
       app.UseMiddleware<ErrorHandlingMiddleware>();
       if (env.IsDevelopment())
       {
         // app.UseDeveloperExceptionPage();
       }
+      else
+      {
+        app.UseHsts();
+      }
+      // securing response headers
+      app.UseXContentTypeOptions();
+      app.UseReferrerPolicy(opt => opt.NoReferrer());
+      app.UseXXssProtection(opt => opt.EnabledWithBlockMode());
+      app.UseXfo(opt => opt.Deny());
+      // app.UseCspReportOnly(opt => opt
+      app.UseCsp(opt => opt
+        .BlockAllMixedContent()
+        .StyleSources(s => s.Self().CustomSources("https://fonts.googleapis.com", "sha256-vO7sx3LWTL1uMXMyIVfkmu4W49kGsQhGFFtmmxJyzMA="))
+        .FontSources(s => s.Self().CustomSources("https://fonts.gstatic.com", "data:"))
+        .FormActions(s => s.Self())
+        .FrameAncestors(s => s.Self())
+        .ImageSources(s => s.Self().CustomSources("https://res.cloudinary.com", "blob:", "data:"))
+        .ScriptSources(s => s.Self().CustomSources("sha256-eE1k/Cs1U0Li9/ihPPQ7jKIGDvR8fYw65VJw+txfifw="))
+      );
 
       // app.UseHttpsRedirection();
 
+      // looks in wwwroot folder for serveable files * needs to come before UseStaticFiles*
+      app.UseDefaultFiles();
+      // needs to come before UseRouting
+      app.UseStaticFiles();
 
       app.UseRouting();
       app.UseCors("CorsPolicy");
@@ -137,6 +184,8 @@ namespace API
       {
         endpoints.MapControllers();
         endpoints.MapHub<ChatHub>("/chat");
+        // tell api that any unknown routes are passed to react app
+        endpoints.MapFallbackToController("Index", "Fallback");
       });
     }
   }

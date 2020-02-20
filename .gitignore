@@ -4,3 +4,8 @@ obj
 .DS_Store
 appsettings.json
 *.db
+wwwroot
+publish
+linuxsetup.txt
+Migrations_MYSQL
+Migrations_SQLITE

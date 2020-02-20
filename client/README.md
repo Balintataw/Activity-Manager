@@ -39,3 +39,7 @@ Create new class library
 ### `dotnet sln add <name>`
 
 Add class library to the solution
+
+### `dotnet publish -c Release -o publish --self-contained false Reactivities.sln`
+
+Build/Publish dotnet api

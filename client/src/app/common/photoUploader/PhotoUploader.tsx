@@ -22,7 +22,7 @@ const PhotoUploader: React.FC<IProps> = ({ loading, uploadPhoto }) => {
 
   return (
     <Fragment>
-      <Grid>
+      <Grid stackable>
         <Grid.Column width={4}>
           <Header color="teal" sub content="Step 1 - Add Photo" />
           <PhotoDropzone setFiles={setFiles} />

@@ -45,3 +45,14 @@ body {
 }
 
 /*end home page styles*/
+
+#root
+  > div.ui.container
+  > div
+  > div
+  > div:nth-child(2)
+  > div
+  > div.ui.fluid.menu
+  a.item {
+  flex-grow: 1;
+}

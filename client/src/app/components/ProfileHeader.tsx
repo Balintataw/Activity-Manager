@@ -29,7 +29,7 @@ const ProfileHeader: React.FC<IProps> = ({
 }) => {
   return (
     <Segment>
-      <Grid>
+      <Grid stackable>
         <Grid.Column width={12}>
           <Item.Group>
             <Item>
