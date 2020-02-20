@@ -3,9 +3,11 @@ obj
 .vscode
 .DS_Store
 appsettings.json
+appsettings.Development.json
 *.db
 wwwroot
 publish
 linuxsetup.txt
 Migrations_MYSQL
 Migrations_SQLITE
+Migrations_SQLSERVER

@@ -6,6 +6,7 @@ import { Form as FinalForm, Field } from "react-final-form";
 import { Segment, Header, Form, Button, Comment } from "semantic-ui-react";
 import { RootStoreContext } from "../stores/rootStore";
 import TextAreaInput from "../common/form/TextAreaInput";
+import { combineValidators, isRequired } from "revalidate";
 
 const ActivityDetailsChat = () => {
   const rootStore = useContext(RootStoreContext);
@@ -22,6 +23,10 @@ const ActivityDetailsChat = () => {
       stopHubConnection(activity!.id);
     };
   }, [createHubConnection, stopHubConnection, activity]);
+
+  const validate = combineValidators({
+    body: isRequired({ message: "Cannot be empty" })
+  });
 
   return (
     <Fragment>
@@ -53,8 +58,9 @@ const ActivityDetailsChat = () => {
               </Comment>
             ))}
           <FinalForm
+            validate={validate}
             onSubmit={addComment}
-            render={({ handleSubmit, submitting, form }) => (
+            render={({ handleSubmit, submitting, form, pristine }) => (
               <Form onSubmit={() => handleSubmit()!.then(() => form.reset())}>
                 <Field
                   name="body"
@@ -68,6 +74,7 @@ const ActivityDetailsChat = () => {
                   icon="edit"
                   primary
                   loading={submitting}
+                  disabled={pristine}
                 />
               </Form>
             )}

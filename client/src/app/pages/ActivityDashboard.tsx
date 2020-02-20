@@ -30,7 +30,7 @@ const ActivityDashboard: React.FC = () => {
   }, [loadActivities]);
 
   return (
-    <Grid>
+    <Grid stackable reversed="mobile">
       <GridColumn width={10}>
         {loading && page === 0 ? (
           <ActivityListItemPlaceholder />

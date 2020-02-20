@@ -43,3 +43,12 @@ Add class library to the solution
 ### `dotnet publish -c Release -o publish --self-contained false Reactivities.sln`
 
 Build/Publish dotnet api
+
+### `npm run dotnet:publish`
+
+or, publish from within client folder
+
+<br />
+To change dbs for local dev or deployment, delete Migrations folder in /Persistence, check env setting in API of launchSettings.json, check startup.cs that ConfigureServices is using the db type you want, run new migration from root directory, and run api.
+
+### `dotnet ef migrations add <migrationname> -p Persistence -s API`

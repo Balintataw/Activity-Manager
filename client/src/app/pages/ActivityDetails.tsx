@@ -23,7 +23,7 @@ const ActivityDetails: React.FC = () => {
   if (!activity) return <h2>Activity not found</h2>;
 
   return (
-    <Grid>
+    <Grid stackable>
       <Grid.Column width={10}>
         <ActivityDetailsHeader activity={activity} />
         <ActivityDetailsInfo activity={activity} />
